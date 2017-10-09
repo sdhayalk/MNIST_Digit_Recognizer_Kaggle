@@ -25,6 +25,7 @@ dataset_labels_train = dataset_labels_train[0:36000, :]
 
 # reshape dataset_features_train and dataset_features_test to such that can be used by tf.nn.conv2d
 dataset_features_train = dataset_features_train.reshape((-1, 28, 28, 1))
+dataset_labels_validation = dataset_labels_validation.reshape((-1, 28, 28, 1))
 dataset_features_test = dataset_features_test.reshape((-1, 28, 28, 1))
 print('dataset_features_train.shape:', dataset_features_train.shape)
 
