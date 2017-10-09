@@ -65,14 +65,17 @@ def convolutional_neural_network(input):
 	layer_1_output = tf.nn.relu(layer_1_output)
 	layer_1_output = tf.nn.max_pool(layer_1_output, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
+	layer_1_output = tf.contrib.layers.batch_norm(layer_1_output)
 	layer_2_output = tf.nn.conv2d(layer_1_output, weights['w2'], strides=[1, 1, 1, 1], padding='SAME') + biases['b2']
 	layer_2_output = tf.nn.relu(layer_2_output)
 	layer_2_output = tf.nn.max_pool(layer_2_output, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
+	layer_2_output = tf.contrib.layers.batch_norm(layer_2_output)
 	layer_3_output = tf.nn.conv2d(layer_2_output, weights['w3'], strides=[1, 1, 1, 1], padding='SAME') + biases['b3']
 	layer_3_output = tf.nn.relu(layer_3_output)
 	layer_3_output = tf.nn.max_pool(layer_3_output, ksize=[1, 2, 2, 1], strides=[1, 1, 1, 1], padding='SAME')
 
+	layer_3_output = tf.contrib.layers.batch_norm(layer_3_output)
 	layer_3_output = tf.reshape(layer_3_output, [-1, 7*7*128])	# flatten layer_4_output
 	layer_4_output = tf.add(tf.matmul(layer_3_output, weights['wfc1']), biases['bfc1'])
 
