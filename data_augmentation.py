@@ -23,17 +23,17 @@ def augment_data(dataset, dataset_labels, augementation_factor=1, use_random_rot
 			augmented_image_labels.append(dataset_labels[num])
 
 			if use_random_rotation:
-				augmented_image.append(tf.contrib.keras.preprocessing.image.random_rotation(dataset[num], 10, row_axis=0, col_axis=1, channel_axis=2))
+				augmented_image.append(tf.contrib.keras.preprocessing.image.random_rotation(dataset[num], 20, row_axis=0, col_axis=1, channel_axis=2))
 				augmented_image_labels.append(dataset_labels[num])
 
 			if use_random_shear:
-				augmented_image.append(tf.contrib.keras.preprocessing.image.random_shear(dataset[num], 0.1, row_axis=0, col_axis=1, channel_axis=2))
+				augmented_image.append(tf.contrib.keras.preprocessing.image.random_shear(dataset[num], 0.2, row_axis=0, col_axis=1, channel_axis=2))
 				augmented_image_labels.append(dataset_labels[num])
 
 			if use_random_shift:
 				# augmented_image.append(tf.contrib.keras.preprocessing.image.random_shift(dataset[num], 0.1, 0, row_axis=0, col_axis=1, channel_axis=2))
 				# augmented_image.append(tf.contrib.keras.preprocessing.image.random_shift(dataset[num], 0, 0.1, row_axis=0, col_axis=1, channel_axis=2))
-				augmented_image.append(tf.contrib.keras.preprocessing.image.random_shift(dataset[num], 0.1, 0.1, row_axis=0, col_axis=1, channel_axis=2))
+				augmented_image.append(tf.contrib.keras.preprocessing.image.random_shift(dataset[num], 0.2, 0.2, row_axis=0, col_axis=1, channel_axis=2))
 				augmented_image_labels.append(dataset_labels[num])
 
 			# if use_random_zoom:
