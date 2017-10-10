@@ -14,7 +14,7 @@ def augment_data(dataset, dataset_labels, augementation_factor=1, use_random_rot
 	augmented_image_labels = []
 	counter = 0
 
-	for num in range (0, 5):
+	for num in range (0, dataset.shape[0]):
 		# image_tensor = tf.convert_to_tensor(image, np.float32)
 
 		for i in range(0, augementation_factor):

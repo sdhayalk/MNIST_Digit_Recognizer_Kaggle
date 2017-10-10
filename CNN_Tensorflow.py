@@ -30,7 +30,7 @@ dataset_features_validation = dataset_features_validation.reshape((-1, 28, 28, 1
 dataset_features_test = dataset_features_test.reshape((-1, 28, 28, 1))
 print('dataset_features_train.shape:', dataset_features_train.shape)
 
-dataset_features_train, dataset_labels_train = augment_data(dataset_features_train, dataset_labels_train)
+dataset_features_train, dataset_labels_train = augment_data(dataset_features_train, dataset_labels_train, augementation_factor=2)
 print('dataset_features_train.shape after augmentation:', dataset_features_train.shape)
 # np.save('dataset_features_train', dataset_features_train)
 # dataset_features_train = np.load('dataset_features_train.npy')
