@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 from preprocessing import get_dataset_in_np, normalize, get_test_dataset_in_np
+from data_augmentation import augment_data
 
 def get_batch(dataset, i, BATCH_SIZE):
 	if i*BATCH_SIZE+BATCH_SIZE > dataset.shape[0]:
@@ -29,12 +30,17 @@ dataset_features_validation = dataset_features_validation.reshape((-1, 28, 28, 1
 dataset_features_test = dataset_features_test.reshape((-1, 28, 28, 1))
 print('dataset_features_train.shape:', dataset_features_train.shape)
 
+dataset_features_train, dataset_labels_train = augment_data(dataset_features_train, dataset_labels_train)
+print('dataset_features_train.shape after augmentation:', dataset_features_train.shape)
+# np.save('dataset_features_train', dataset_features_train)
+# dataset_features_train = np.load('dataset_features_train.npy')
+
 # define some hyperparameters
 NUM_EXAMPLES = dataset_features_train.shape[0]
 DIM_INPUT_FLAT = dataset_features_train.shape[1]
 DIM_INPUT = [28, 28, 1]
 DIM_OUTPUT = 10
-NUM_EPOCHS = 50
+NUM_EPOCHS = 5
 BATCH_SIZE = 36
 
 # placeholders for input and true label output
@@ -111,3 +117,26 @@ with tf.Session() as sess:
 		accuracy_validation = accuracy_function.eval({x:dataset_features_validation, y:dataset_labels_validation})
 		print("Validation Accuracy in Epoch ", epoch, ":", accuracy_validation)
 	# training end
+
+	# testing start
+	y_predicted = tf.nn.softmax(logits)
+	batch_x = get_batch(dataset_features_test, 0, BATCH_SIZE)
+	y_predicted_labels = sess.run(tf.argmax(y_predicted, 1), feed_dict={x: batch_x})
+	i_= 0
+	for i in range(1, int(dataset_features_test.shape[0]/BATCH_SIZE)):
+		batch_x = get_batch(dataset_features_test, i, BATCH_SIZE)
+		y_predicted_labels = np.concatenate((y_predicted_labels, sess.run(tf.argmax(y_predicted, 1), feed_dict={x: batch_x})), axis=0)
+		i_ = i
+	batch_x = get_batch(dataset_features_test, i_+1, BATCH_SIZE)
+	y_predicted_labels = np.concatenate((y_predicted_labels, sess.run(tf.argmax(y_predicted, 1), feed_dict={x: batch_x})), axis=0)
+	# testing end
+
+# writing predicted labels into a csv file
+y_predicted_labels = np.array(y_predicted_labels)
+with open('run1.csv','w') as file:	
+	file.write('ImageId,Label')
+	file.write('\n')
+
+	for i in range(0, y_predicted_labels.shape[0]):
+		file.write(str(i+1) + ',' + str(int(y_predicted_labels[i])))
+		file.write('\n')
