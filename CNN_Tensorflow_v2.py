@@ -47,12 +47,13 @@ y = tf.placeholder(tf.float32, shape=[None, DIM_OUTPUT])
 
 # define the weights with respective shapes
 weights = {
-	'w1': tf.Variable(tf.contrib.layers.xavier_initializer_conv2d([3, 3, 1, 32])),		#[filter_dim_1, filter_dim_2, num_input_channels, num_output_channels]
-	'w2': tf.Variable(tf.contrib.layers.xavier_initializer_conv2d([3, 3, 32, 64])),
-	'w3': tf.Variable(tf.contrib.layers.xavier_initializer_conv2d([3, 3, 64, 128])),
-	'wfc1': tf.Variable(tf.contrib.layers.xavier_initializer([7*7*128, 1024])),
-	'wfc2': tf.Variable(tf.contrib.layers.xavier_initializer([1024, DIM_OUTPUT])),
+	'w1': tf.Variable(tf.contrib.layers.xavier_initializer_conv2d()(shape=[3, 3, 1, 32])),		#[filter_dim_1, filter_dim_2, num_input_channels, num_output_channels]
+	'w2': tf.Variable(tf.contrib.layers.xavier_initializer_conv2d()(shape=[3, 3, 32, 64])),
+	'w3': tf.Variable(tf.contrib.layers.xavier_initializer_conv2d()(shape=[3, 3, 64, 128])),
+	'wfc1': tf.Variable(tf.contrib.layers.xavier_initializer()(shape=[7*7*128, 1024])),
+	'wfc2': tf.Variable(tf.contrib.layers.xavier_initializer()(shape=[1024, DIM_OUTPUT])),
 }
+# xavier initializer referred from: https://programtalk.com/python-examples/tensorflow.contrib.layers.xavier_initializer_conv2d/
 
 # define the biases with respective shapes
 biases = {
