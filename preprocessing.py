@@ -36,6 +36,22 @@ def normalize(dataset):
 	dataset = dataset / 255
 	return dataset
 
+def squash_to_0_1(dataset):
+	new_dataset = []
+
+	for arr in dataset:
+		new_arr = []
+		for element in arr:
+			if element < 0:
+				new_arr.append(0.0)
+			else:
+				new_arr.append(1.0)
+
+		new_dataset.append(new_arr)
+
+	return np.array(new_dataset)
+
+
 def get_test_dataset_in_np(dataset_path):
 	dataset = []
 	first_line_flag = True

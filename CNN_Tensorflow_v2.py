@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-from preprocessing import get_dataset_in_np, normalize, get_test_dataset_in_np
+from preprocessing import get_dataset_in_np, normalize, squash_to_0_1, get_test_dataset_in_np
 from data_augmentation import augment_data
 
 def get_batch(dataset, i, BATCH_SIZE):
@@ -15,8 +15,10 @@ DATASET_TEST_PATH = 'G:/DL/MNIST Digit Recognizer/data/test.csv'
 
 dataset_features_train, dataset_labels_train = get_dataset_in_np(DATASET_TRAIN_PATH)
 dataset_features_train = normalize(dataset_features_train)
+dataset_features_train = squash_to_0_1(dataset_features_train)
 dataset_features_test = get_test_dataset_in_np(DATASET_TEST_PATH)
 dataset_features_test = normalize(dataset_features_test)
+dataset_features_test = squash_to_0_1(dataset_features_test)
 
 # divide dataset into training and validation sets
 dataset_features_validation = dataset_features_train[36000:dataset_features_train.shape[0], :]
