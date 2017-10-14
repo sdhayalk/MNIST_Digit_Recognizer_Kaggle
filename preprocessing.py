@@ -42,7 +42,7 @@ def squash_to_0_1(dataset):
 	for arr in dataset:
 		new_arr = []
 		for element in arr:
-			if element < 0:
+			if element < 0.5:
 				new_arr.append(0.0)
 			else:
 				new_arr.append(1.0)
