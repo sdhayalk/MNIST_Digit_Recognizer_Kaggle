@@ -33,7 +33,7 @@ dataset_features_validation = dataset_features_validation.reshape((-1, 28, 28, 1
 dataset_features_test = dataset_features_test.reshape((-1, 28, 28, 1))
 print('dataset_features_train.shape:', dataset_features_train.shape)
 
-dataset_features_train_augmented, dataset_labels_train_augmented = augment_data(dataset_features_train, dataset_labels_train, augementation_factor=2)
+dataset_features_train_augmented, dataset_labels_train_augmented = augment_data(dataset_features_train, dataset_labels_train, augementation_factor=1)
 print('dataset_features_train.shape after augmentation:', dataset_features_train.shape)
 
 # define some hyperparameters
@@ -86,7 +86,7 @@ def convolutional_neural_network(input, connected_components):
 
 	layer_3_output = tf.contrib.layers.batch_norm(layer_3_output)
 	layer_3_output = tf.reshape(layer_3_output, [-1, 7*7*128])				# flatten layer_4_output
-	layer_3_output = tf.concat([layer_3_output, connected_components], 0)	# concatenating connected_components
+	layer_3_output = tf.concat([layer_3_output, connected_components], 1)	# concatenating connected_components
 
 	layer_4_output = tf.add(tf.matmul(layer_3_output, weights['wfc1']), biases['bfc1'])
 
@@ -155,5 +155,5 @@ with tf.Session() as sess:
 				file.write('\n')
 
 		# get new set of augmented training features
-		dataset_features_train_augmented, dataset_labels_train_augmented = augment_data(dataset_features_train, dataset_labels_train, augementation_factor=2)
+		dataset_features_train_augmented, dataset_labels_train_augmented = augment_data(dataset_features_train, dataset_labels_train, augementation_factor=1)
 		

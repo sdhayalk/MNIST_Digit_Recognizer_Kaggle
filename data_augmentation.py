@@ -16,12 +16,12 @@ def augment_data(dataset, dataset_labels, augementation_factor=1, use_random_rot
 
 	for num in range (0, dataset.shape[0]):
 		# image_tensor = tf.convert_to_tensor(image, np.float32)
+		
+		# original image:
+		augmented_image.append(dataset[num])
+		augmented_image_labels.append(dataset_labels[num])
 
 		for i in range(0, augementation_factor):
-			# original image:
-			augmented_image.append(dataset[num])
-			augmented_image_labels.append(dataset_labels[num])
-
 			if use_random_rotation:
 				augmented_image.append(tf.contrib.keras.preprocessing.image.random_rotation(dataset[num], 20, row_axis=0, col_axis=1, channel_axis=2))
 				augmented_image_labels.append(dataset_labels[num])
