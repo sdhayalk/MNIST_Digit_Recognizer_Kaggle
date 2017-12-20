@@ -3,6 +3,7 @@ import numpy as np
 
 from preprocessing import get_dataset_in_np, normalize, squash_to_0_1, get_test_dataset_in_np
 from data_augmentation import augment_data
+from feature_engineering_connected_components import find_batch_connected_components
 
 def get_batch(dataset, i, BATCH_SIZE):
 	if i*BATCH_SIZE+BATCH_SIZE > dataset.shape[0]:
@@ -46,14 +47,15 @@ BATCH_SIZE = 36
 # placeholders for input and true label output
 x = tf.placeholder(tf.float32, shape=[None, 28, 28, 1])
 y = tf.placeholder(tf.float32, shape=[None, DIM_OUTPUT])
+connected_components = tf.placeholder(tf.float32, shape=[None, 4])
 
 # define the weights with respective shapes
 weights = {
 	'w1': tf.Variable(tf.contrib.layers.xavier_initializer_conv2d()(shape=[3, 3, 1, 32])),		#[filter_dim_1, filter_dim_2, num_input_channels, num_output_channels]
 	'w2': tf.Variable(tf.contrib.layers.xavier_initializer_conv2d()(shape=[3, 3, 32, 64])),
 	'w3': tf.Variable(tf.contrib.layers.xavier_initializer_conv2d()(shape=[3, 3, 64, 128])),
-	'wfc1': tf.Variable(tf.contrib.layers.xavier_initializer()(shape=[7*7*128, 1024])),
-	'wfc2': tf.Variable(tf.contrib.layers.xavier_initializer()(shape=[1024, DIM_OUTPUT])),
+	'wfc1': tf.Variable(tf.contrib.layers.xavier_initializer()(shape=[7*7*128+4, 256])),
+	'wfc2': tf.Variable(tf.contrib.layers.xavier_initializer()(shape=[256, DIM_OUTPUT])),
 }
 # xavier initializer referred from: https://programtalk.com/python-examples/tensorflow.contrib.layers.xavier_initializer_conv2d/
 
@@ -62,12 +64,12 @@ biases = {
 	'b1': tf.Variable(tf.random_normal([32])),
 	'b2': tf.Variable(tf.random_normal([64])),
 	'b3': tf.Variable(tf.random_normal([128])),
-	'bfc1': tf.Variable(tf.random_normal([1024])),
+	'bfc1': tf.Variable(tf.random_normal([256])),
 	'bfc2': tf.Variable(tf.random_normal([DIM_OUTPUT]))
 }
 
 # construct the convolutional neural network architecture
-def convolutional_neural_network(input):
+def convolutional_neural_network(input, connected_components):
 	layer_1_output = tf.nn.conv2d(input, weights['w1'], strides=[1, 1, 1, 1], padding='SAME') + biases['b1']
 	layer_1_output = tf.nn.relu(layer_1_output)
 	layer_1_output = tf.nn.max_pool(layer_1_output, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
@@ -83,14 +85,16 @@ def convolutional_neural_network(input):
 	layer_3_output = tf.nn.max_pool(layer_3_output, ksize=[1, 2, 2, 1], strides=[1, 1, 1, 1], padding='SAME')
 
 	layer_3_output = tf.contrib.layers.batch_norm(layer_3_output)
-	layer_3_output = tf.reshape(layer_3_output, [-1, 7*7*128])	# flatten layer_4_output
+	layer_3_output = tf.reshape(layer_3_output, [-1, 7*7*128])				# flatten layer_4_output
+	layer_3_output = tf.concat([layer_3_output, connected_components], 0)	# concatenating connected_components
+
 	layer_4_output = tf.add(tf.matmul(layer_3_output, weights['wfc1']), biases['bfc1'])
 
 	layer_5_output = tf.add(tf.matmul(layer_4_output, weights['wfc2']), biases['bfc2'])
 
 	return layer_5_output
 
-logits = convolutional_neural_network(x)
+logits = convolutional_neural_network(x, connected_components)
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y))
 optimizer = tf.train.AdamOptimizer()
 training = optimizer.minimize(loss)
@@ -104,9 +108,11 @@ with tf.Session() as sess:
 
 		for i in range(0, int(NUM_EXAMPLES/BATCH_SIZE)):
 			batch_x = get_batch(dataset_features_train_augmented, i, BATCH_SIZE)	# get batch of features of size BATCH_SIZE
-			batch_y = get_batch(dataset_labels_train_augmented, i, BATCH_SIZE)	# get batch of labels of size BATCH_SIZE
+			batch_y = get_batch(dataset_labels_train_augmented, i, BATCH_SIZE)		# get batch of labels of size BATCH_SIZE
 
-			_, batch_cost = sess.run([training, loss], feed_dict={x: batch_x, y: batch_y})	# train on the given batch size of features and labels
+			batch_x_connected_components = find_batch_connected_components(batch_x)	# get connected components info using feature engineering
+
+			_, batch_cost = sess.run([training, loss], feed_dict={x: batch_x, y: batch_y, connected_components:batch_x_connected_components})	# train on the given batch size of features and labels
 			total_cost += batch_cost
 
 		print("Epoch:", epoch, "\tCost:", total_cost)
@@ -115,21 +121,27 @@ with tf.Session() as sess:
 		y_predicted = tf.nn.softmax(logits)
 		correct = tf.equal(tf.argmax(y_predicted, 1), tf.argmax(y, 1))
 		accuracy_function = tf.reduce_mean(tf.cast(correct, 'float'))
-		accuracy_validation = accuracy_function.eval({x:dataset_features_validation, y:dataset_labels_validation})
+		dataset_features_validation_connected_components = find_batch_connected_components(dataset_features_validation)	# get connected components info using feature engineering
+		accuracy_validation = accuracy_function.eval({x:dataset_features_validation, y:dataset_labels_validation, connected_components:dataset_features_validation_connected_components})
 		print("Validation Accuracy in Epoch ", epoch, ":", accuracy_validation)
 		# training end
 
 		# testing start
 		y_predicted = tf.nn.softmax(logits)
 		batch_x = get_batch(dataset_features_test, 0, BATCH_SIZE)
-		y_predicted_labels = sess.run(tf.argmax(y_predicted, 1), feed_dict={x: batch_x})
+		batch_x_connected_components = find_batch_connected_components(batch_x)	# get connected components info using feature engineering
+		y_predicted_labels = sess.run(tf.argmax(y_predicted, 1), feed_dict={x: batch_x, connected_components:batch_x_connected_components})
+		
 		i_= 0
 		for i in range(1, int(dataset_features_test.shape[0]/BATCH_SIZE)):
 			batch_x = get_batch(dataset_features_test, i, BATCH_SIZE)
-			y_predicted_labels = np.concatenate((y_predicted_labels, sess.run(tf.argmax(y_predicted, 1), feed_dict={x: batch_x})), axis=0)
+			batch_x_connected_components = find_batch_connected_components(batch_x)	# get connected components info using feature engineering
+			y_predicted_labels = np.concatenate((y_predicted_labels, sess.run(tf.argmax(y_predicted, 1), feed_dict={x: batch_x, connected_components:batch_x_connected_components})), axis=0)
 			i_ = i
+		
 		batch_x = get_batch(dataset_features_test, i_+1, BATCH_SIZE)
-		y_predicted_labels = np.concatenate((y_predicted_labels, sess.run(tf.argmax(y_predicted, 1), feed_dict={x: batch_x})), axis=0)
+		batch_x_connected_components = find_batch_connected_components(batch_x)	# get connected components info using feature engineering
+		y_predicted_labels = np.concatenate((y_predicted_labels, sess.run(tf.argmax(y_predicted, 1), feed_dict={x: batch_x, connected_components:batch_x_connected_components})), axis=0)
 		# testing end
 
 		# writing predicted labels into a csv file
