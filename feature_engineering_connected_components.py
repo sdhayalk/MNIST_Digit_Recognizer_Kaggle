@@ -1,5 +1,19 @@
 import numpy as np
 
+def convert_to_0_1(features):
+    new_features = []
+    for arr in features:
+        temp = []
+        for element in arr:
+            if element >= 0.5:
+                temp.append(1)
+            else:
+                temp.append(0)
+        new_features.append(temp)
+
+    return np.array(new_features, dtype='int')
+
+
 def search_neighbours(temp_x, temp_y, visited, queue, features_reshaped):
     if (temp_y-1 >= 0):
         if (temp_x, temp_y-1) not in visited and features_reshaped[temp_x][temp_y-1] == 0:
@@ -44,6 +58,7 @@ def find_next_unvisited_point(features_reshaped, visited):
 def find_batch_connected_components(batch_x):
     batch_x_connected_components = []
     for features in batch_x:
+        features = convert_to_0_1(features)
         features_reshaped = features.reshape((28,28))
         flag = True
         visited = []
