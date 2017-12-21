@@ -58,8 +58,8 @@ def find_next_unvisited_point(features_reshaped, visited):
 def find_batch_connected_components(batch_x):
     batch_x_connected_components = []
     for features in batch_x:
-        features = convert_to_0_1(features)
         features_reshaped = features.reshape((28,28))
+        features_reshaped = convert_to_0_1(features_reshaped)
         flag = True
         visited = []
         queue = []
