@@ -11,8 +11,10 @@ def get_batch(dataset, i, BATCH_SIZE):
 	return dataset[i*BATCH_SIZE:(i*BATCH_SIZE+BATCH_SIZE), :]
 
 
-DATASET_TRAIN_PATH = 'G:/DL/MNIST Digit Recognizer/data/train.csv'
-DATASET_TEST_PATH = 'G:/DL/MNIST Digit Recognizer/data/test.csv'
+# DATASET_TRAIN_PATH = 'G:/DL/MNIST Digit Recognizer/data/train.csv'
+# DATASET_TEST_PATH = 'G:/DL/MNIST Digit Recognizer/data/test.csv'
+DATASET_TRAIN_PATH = '/home/paperspace/mnist/train.csv'
+DATASET_TEST_PATH = '/home/paperspace/mnist/test.csv'
 
 dataset_features_train, dataset_labels_train = get_dataset_in_np(DATASET_TRAIN_PATH)
 dataset_features_train = normalize(dataset_features_train)

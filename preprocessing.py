@@ -33,7 +33,7 @@ def get_dataset_in_np(dataset_path):
 	return dataset_features, dataset_labels
 
 def normalize(dataset):
-	dataset = dataset / 255
+	dataset = dataset / 255.0
 	return dataset
 
 def squash_to_0_1(dataset):
